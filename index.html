@@ -3,34 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Number Guessing Game</title>
+  <title>Panda & Bear Guessing Game</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin-top: 60px; }
-    input, button { font-size: 18px; padding: 8px; }
-    #message { font-size: 22px; margin-top: 20px; }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+    }
+
+    .card {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      padding: 30px;
+      border-radius: 25px;
+      text-align: center;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 { margin-top: 0; color: #d6609a; font-size: 26px; }
+    p { color: #666; }
+
+    .characters {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      font-size: 64px;
+      margin: 10px 0;
+    }
+    .heart { font-size: 32px; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    @keyframes celebrate {
+      0%, 100% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(1.2) rotate(-8deg); }
+      75% { transform: scale(1.2) rotate(8deg); }
+    }
+    .bounce { animation: bounce 0.5s; }
+    .celebrate { animation: celebrate 0.6s 3; }
+
+    input {
+      width: 100%;
+      font-size: 24px;
+      padding: 12px;
+      text-align: center;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      outline: none;
+    }
+    input:focus { border-color: #f78fb3; }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 12px;
+      font-size: 18px;
+      color: white;
+      background: #f78fb3;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s, background 0.2s;
+    }
+    button:hover { background: #e8709b; transform: scale(1.03); }
+
+    .secondary { background: #a6a6c7; }
+    .secondary:hover { background: #8d8db3; }
+
+    #message {
+      font-size: 20px;
+      font-weight: bold;
+      min-height: 55px;
+      margin: 18px 0 5px;
+    }
+    .low { color: #3182ce; }
+    .high { color: #dd6b20; }
+    .win { color: #38a169; }
+    .attempts { font-size: 18px; }
   </style>
 </head>
 <body>
-  <h1>Number Guessing Game</h1>
-  <p>I'm thinking of a number between 1 and 100.</p>
+  <div class="card">
+    <h1>Panda &amp; Bear Guessing Game</h1>
+    <p>Help them find the secret number between 1 and 100!</p>
 
-  <input type="number" id="guess" min="1" max="100">
-  <button onclick="checkGuess()">Guess</button>
+    <div class="characters" id="characters">
+      <span>🐼</span>
+      <span class="heart" id="heart">💞</span>
+      <span>🐻</span>
+    </div>
 
-  <p id="message"></p>
-  <p>Attempts: <span id="attempts">0</span></p>
-  <button onclick="newGame()">New Game</button>
+    <input type="number" id="guess" min="1" max="100" placeholder="Enter your guess">
+    <button onclick="checkGuess()">Guess</button>
+
+    <p id="message"></p>
+    <p class="attempts">Attempts: <span id="attempts">0</span></p>
+    <button class="secondary" onclick="newGame()">New Game</button>
+  </div>
 
   <script>
     let secret = Math.floor(Math.random() * 100) + 1;
     let attempts = 0;
 
-    function checkGuess() {
-      const input = document.getElementById("guess");
-      const message = document.getElementById("message");
+    const input = document.getElementById("guess");
+    const message = document.getElementById("message");
+    const heart = document.getElementById("heart");
+    const characters = document.getElementById("characters");
 
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") checkGuess();
+    });
+
+    function animate(className, time) {
+      characters.classList.add(className);
+      setTimeout(function () {
+        characters.classList.remove(className);
+      }, time);
+    }
+
+    function checkGuess() {
       if (input.value === "") {
         message.textContent = "Please enter a number.";
+        message.className = "";
         return;
       }
 
@@ -39,20 +143,34 @@
       document.getElementById("attempts").textContent = attempts;
 
       if (guess < secret) {
-        message.textContent = "Too low!";
+        message.textContent = "Too low! Bear is hiding higher 🐻";
+        message.className = "low";
+        heart.textContent = "⬆️";
+        animate("bounce", 500);
       } else if (guess > secret) {
-        message.textContent = "Too high!";
+        message.textContent = "Too high! Panda says go lower 🐼";
+        message.className = "high";
+        heart.textContent = "⬇️";
+        animate("bounce", 500);
       } else {
-        message.textContent = "You got it in " + attempts + " attempts!";
+        message.textContent = "🎉 You found it in " + attempts + " attempts! Panda and Bear are hugging!";
+        message.className = "win";
+        heart.textContent = "💖";
+        animate("celebrate", 1800);
       }
+
+      input.value = "";
+      input.focus();
     }
 
     function newGame() {
       secret = Math.floor(Math.random() * 100) + 1;
       attempts = 0;
       document.getElementById("attempts").textContent = 0;
-      document.getElementById("message").textContent = "";
-      document.getElementById("guess").value = "";
+      message.textContent = "";
+      message.className = "";
+      heart.textContent = "💞";
+      input.value = "";
     }
   </script>
 </body>
